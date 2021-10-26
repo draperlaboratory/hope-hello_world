@@ -5,9 +5,17 @@ PLATFORM ?= vcu118
 XLEN ?= 64
 CPU_CLOCK_HZ ?= 100000000
 
+ifeq ($(XLEN),32)
+ARCH=rv32ima
+ABI=ilp32
+else
+ARCH=rv64imafd
+ABI=lp64d
+endif
+
 RISCV_CC ?= $(ISP_PREFIX)/bin/clang --target=riscv$(XLEN)-unknown-elf
 DEFINES=-DRV$(XLEN) -DCPU_CLOCK_HZ=$(CPU_CLOCK_HZ) -DALIGN_UART
-CFLAGS += -mcmodel=medany -march=rv64imafd -mabi=lp64d -std=gnu11 -mno-relax -ffunction-sections -fdata-sections -fno-builtin-printf
+CFLAGS += -mcmodel=medany -march=$(ARCH) -mabi=$(ABI) -std=gnu11 -mno-relax -ffunction-sections -fdata-sections -fno-builtin-printf --sysroot=$(ISP_PREFIX)/clang_sysroot/riscv64-unknown-elf
 LDFLAGS += -L$(BSP) -Tlink.ld -nostartfiles -fuse-ld=lld -Wl,--wrap=isatty -Wl,--wrap=printf -Wl,--wrap=puts -Wl,--wrap=read -Wl,--wrap=write -Wl,--wrap=malloc -Wl,--wrap=free -Wl,--undefined=pvPortMalloc -Wl,--undefined=pvPortFree
 
 BSP ?= bsp
